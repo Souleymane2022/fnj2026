@@ -1,6 +1,6 @@
 <?php
 /**
- * Configuration du Forum National de la Jeunesse 2026.
+ * Configuration de la 27ᵉ Fête Nationale de la Jeunesse (FNJ 2026 – Pala).
  *
  * Toutes les valeurs ci-dessous peuvent être adaptées sans toucher au reste
  * du code. Les valeurs sensibles (secret, mots de passe) peuvent aussi être
@@ -10,13 +10,19 @@
 return [
     // --- Événement ----------------------------------------------------------
     'event' => [
-        'nom'        => 'Forum National de la Jeunesse',
+        'nom'        => 'Fête Nationale de la Jeunesse',
+        'court'      => 'la FNJ',                 // « inscription à la FNJ »
         'sigle'      => 'FNJ 2026',
+        'edition'    => '27ᵉ édition',
         'annee'      => '2026',
-        'theme'      => 'Jeunesse tchadienne : actrice du développement, de la paix et de l\'innovation',
-        'dates'      => 'Du 10 au 12 décembre 2026',
-        'lieu'       => 'Palais de la Culture et des Arts, N\'Djamena',
-        'date_limite_inscription' => '2026-12-05', // AAAA-MM-JJ, vide = pas de limite
+        'theme'      => 'Jeunesse tchadienne : relevons nos talents, faisons entendre nos voix et construisons l\'avenir',
+        'slogan'     => 'Une jeunesse. Des talents. Des voix. Un avenir. Une paix à construire ensemble.',
+        'patronage'  => 'Sous le Haut Patronage du Maréchal du Tchad, MAHAMAT IDRISS DÉBY ITNO, Président de la République, Chef de l\'État',
+        'dates'      => 'Du 12 au 14 octobre 2026',
+        'lieu'       => 'Pala, province du Mayo-Kebbi Ouest',
+        'ville'      => 'Pala',
+        'logo'       => 'assets/img/logo-fnj27.png',
+        'date_limite_inscription' => '2026-10-10', // AAAA-MM-JJ, vide = pas de limite
     ],
 
     // --- Ministère (repris du site jeunesse.gouv.td) -----------------------
@@ -29,8 +35,9 @@ return [
         'email'     => 'contact@jeunesse.gouv.td',
         'adresse'   => 'N\'Djamena, Tchad',
         'facebook'  => 'https://www.facebook.com/mjspetchad/',
-        // Remplacez assets/img/logo.svg par le logo officiel (PNG ou SVG).
-        'logo'      => 'assets/img/logo.svg',
+        // Armoiries / logo du Ministère (facultatif) : ajoutez le fichier puis
+        // indiquez son chemin, ex. 'assets/img/logo-ministere.png'.
+        'logo'      => '',
     ],
 
     // --- Sécurité -----------------------------------------------------------

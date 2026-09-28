@@ -4,7 +4,7 @@
  *
  * FNJBadge.dessiner(canvas, donnees) -> Promise
  * donnees : { prenom, nom, organisation, fonction, categorie, couleur, code, qr,
- *             photo, logo, evenement, annee, dates, lieu, pays, ministere, province, statut }
+ *             photo, logo, evenement, annee, edition, dates, lieu, pays, ministere, province, statut }
  */
 (function (global) {
   'use strict';
@@ -133,15 +133,17 @@
       // Logo
       if (logo) {
         ctx.save();
-        ctx.beginPath(); ctx.arc(W / 2, 118, 78, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
-        ctx.drawImage(logo, W / 2 - 70, 48, 140, 140);
+        ctx.beginPath(); ctx.arc(W / 2, 116, 84, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.lineWidth = 5; ctx.strokeStyle = OR; ctx.stroke();
+        ctx.beginPath(); ctx.arc(W / 2, 116, 80, 0, Math.PI * 2); ctx.clip();
+        ctx.drawImage(logo, W / 2 - 80, 36, 160, 160);
         ctx.restore();
       }
 
       texteAjuste(ctx, (d.pays || '').toUpperCase(), W / 2, 240, 900, 26, '700', POLICE_TITRE, OR, 4);
       texteAjuste(ctx, d.ministere || '', W / 2, 280, 900, 28, '600', POLICE_CORPS, '#ffffff');
       texteAjuste(ctx, (d.evenement || '').toUpperCase(), W / 2, 350, 920, 50, '800', POLICE_TITRE, '#ffffff', 1);
-      texteAjuste(ctx, d.annee || '', W / 2, 420, 400, 64, '800', POLICE_TITRE, OR, 6);
+      texteAjuste(ctx, (d.edition || d.annee || '').toUpperCase(), W / 2, 418, 900, 50, '800', POLICE_TITRE, OR, 3);
 
       // Photo
       var pw = 330, ph = 412, px = (W - pw) / 2, py = 500;

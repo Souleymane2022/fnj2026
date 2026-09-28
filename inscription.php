@@ -101,7 +101,7 @@ function envoyer_confirmation(array $insc): void
     $ev = config('event');
     $sujet = '=?UTF-8?B?' . base64_encode('Votre badge – ' . $ev['nom'] . ' ' . $ev['annee']) . '?=';
     $corps = "Bonjour {$insc['prenom']} {$insc['nom']},\n\n"
-        . "Votre inscription au {$ev['nom']} {$ev['annee']} est enregistrée.\n"
+        . "Votre inscription à la {$ev['nom']} {$ev['annee']} est enregistrée.\n"
         . "Numéro de badge : {$insc['code']}\n\n"
         . "Téléchargez votre badge électronique ici :\n" . badge_url($insc, true) . "\n\n"
         . "{$ev['dates']} – {$ev['lieu']}\n\n"
@@ -117,7 +117,7 @@ require __DIR__ . '/inc/header.php';
 
 <section class="page-titre" style="background: <?= e($cat['couleur']) ?>">
   <div class="container">
-    <div class="ariane"><a href="index.php">Forum 2026</a> › Inscription</div>
+    <div class="ariane"><a href="index.php">FNJ 2026</a> › Inscription</div>
     <h1><?= $cat['icone'] ?> Formulaire d'inscription – <?= e($cat['label']) ?></h1>
     <p><?= e($cat['resume']) ?></p>
   </div>
@@ -184,7 +184,7 @@ require __DIR__ . '/inc/header.php';
         <div class="champ<?= isset($erreurs['consentement']) ? ' erreur' : '' ?>" style="margin-bottom:22px">
           <label class="consentement">
             <input type="checkbox" name="consentement" value="1" required <?= !empty($_POST['consentement']) ? 'checked' : '' ?>>
-            <span>Je certifie l'exactitude des informations fournies et j'accepte qu'elles soient utilisées par le <?= e(config('ministere.nom')) ?> pour l'organisation du <?= e(config('event.nom') . ' ' . config('event.annee')) ?>. Mon badge est strictement personnel.</span>
+            <span>Je certifie l'exactitude des informations fournies et j'accepte qu'elles soient utilisées par le <?= e(config('ministere.nom')) ?> pour l'organisation de la <?= e(config('event.nom') . ' ' . config('event.annee')) ?>. Mon badge est strictement personnel.</span>
           </label>
           <?php if (isset($erreurs['consentement'])): ?><div class="msg-erreur"><?= e($erreurs['consentement']) ?></div><?php endif; ?>
         </div>
@@ -198,7 +198,7 @@ require __DIR__ . '/inc/header.php';
           <li>Les champs marqués <span class="req" style="color:var(--rouge)">*</span> sont obligatoires.</li>
           <li>Votre badge électronique est généré dès la validation du formulaire<?= in_array($type, config('validation_requise') ?: [], true) ? ' et activé après vérification par le comité d\'organisation' : '' ?>.</li>
           <li>Conservez le lien de votre badge : il est aussi retrouvable avec votre e-mail et votre téléphone.</li>
-          <li>Le badge (QR code) est exigé à chaque entrée sur le site du Forum.</li>
+          <li>Le badge (QR code) est exigé à chaque entrée sur les sites de la FNJ.</li>
           <li>Une seule inscription par personne et par catégorie.</li>
         </ul>
         <hr style="border:0;border-top:1px solid var(--bordure);margin:18px 0">

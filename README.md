@@ -1,6 +1,6 @@
-# Forum National de la Jeunesse 2026 – Inscriptions & badges électroniques
+# 27ᵉ Fête Nationale de la Jeunesse (FNJ 2026 – Pala) – Inscriptions & badges électroniques
 
-Plateforme d'inscription du **Forum National de la Jeunesse 2026** du Ministère de la Jeunesse et des Sports (République du Tchad), dont la charte graphique reprend celle de [jeunesse.gouv.td](https://jeunesse.gouv.td) : barre de contact, liseré tricolore bleu-or-rouge, en-tête avec logo et devise « Unité – Travail – Progrès », menu bleu national.
+Plateforme d'inscription de la **27ᵉ Fête Nationale de la Jeunesse** (Pala, Mayo-Kebbi Ouest, du 12 au 14 octobre 2026) du Ministère de la Jeunesse et des Sports (République du Tchad), dont la charte graphique reprend celle de [jeunesse.gouv.td](https://jeunesse.gouv.td) : barre de contact, liseré tricolore bleu-or-rouge, en-tête avec logo et devise « Unité – Travail – Progrès », menu bleu national.
 
 ## Fonctionnalités
 
@@ -34,7 +34,6 @@ Vercel ne conserve aucun fichier entre deux requêtes : l'application y stocke d
 
    Sans `FNJ_ADMIN_HASH` / `FNJ_AGENT_HASH`, les mots de passe par défaut `fnj2026admin` et `fnj2026controle` restent actifs.
 3. **Déployer** : le dépôt GitHub est relié au projet Vercel ; chaque `git push` sur la branche de production déclenche un déploiement (*Settings → Git → Production Branch*). Après avoir ajouté des variables, relancez un déploiement (*Deployments → Redeploy*).
-4. Remplacer `assets/img/logo.svg` par le logo officiel.
 
 Particularités de Vercel :
 - les photos sont recadrées et compressées **dans le navigateur** (480 × 600 JPEG, ~40 Ko) avant l'envoi, ce qui respecte la limite de 4,5 Mo par requête et économise les données mobiles ;
@@ -46,7 +45,7 @@ Particularités de Vercel :
 Prérequis : PHP 8.0+ avec `pdo_sqlite` (ou `pdo_pgsql`) et idéalement `gd`.
 
 1. Copier le dossier sur le serveur, donner les droits d'écriture sur `data/`.
-2. Modifier **`config.php`** (événement, clé secrète, mots de passe, `validation_requise`).
+2. Modifier **`config.php`** (clé secrète, mots de passe, `validation_requise`). Les informations de l'événement (dates, lieu, thème, logo `assets/img/logo-fnj27.png`, date limite) se trouvent dans la section `event`.
 3. Sans `DATABASE_URL`, une base SQLite est créée dans `data/`.
 
 ## Test en local
@@ -61,7 +60,7 @@ DATABASE_URL=postgres://user:mdp@localhost:5432/fnj php -S 127.0.0.1:8080 api/in
 ## Structure
 
 ```
-index.php          Page d'accueil du Forum
+index.php          Page d'accueil de la FNJ
 inscription.php    Formulaires (?type=jeune|partenaire|sponsor|exposant|presse|officiel|benevole)
 badge.php          Badge électronique (lien personnel signé)
 retrouver.php      Retrouver son badge

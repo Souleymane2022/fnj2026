@@ -9,7 +9,7 @@ $r = root();
   <div class="container site-footer__grid">
     <div>
       <div class="site-footer__brand">
-        <img src="<?= e($r . $m['logo']) ?>" alt="" width="54" height="54">
+        <img src="<?= e($r . $ev['logo']) ?>" alt="" width="64" height="64">
         <div>
           <strong><?= e($m['nom']) ?></strong>
           <span><?= e($m['pays']) ?></span>
@@ -18,11 +18,11 @@ $r = root();
       <p>Le Ministère de la Jeunesse et des Sports est chargé de la conception, de la coordination et de la mise en œuvre de la politique du Gouvernement en matière de jeunesse, de sports et de promotion de l'entrepreneuriat.</p>
     </div>
     <div>
-      <h3><?= e($ev['nom'] . ' ' . $ev['annee']) ?></h3>
+      <h3><?= e($ev['edition']) ?> – <?= e($ev['nom']) ?></h3>
       <ul>
         <li><?= e($ev['dates']) ?></li>
         <li><?= e($ev['lieu']) ?></li>
-        <li><a href="<?= e($r) ?>index.php#inscriptions">S'inscrire au Forum</a></li>
+        <li><a href="<?= e($r) ?>index.php#inscriptions">S'inscrire à la FNJ</a></li>
         <li><a href="<?= e($r) ?>retrouver.php">Retrouver mon badge</a></li>
         <li><a href="<?= e($r) ?>admin/index.php">Espace organisateurs</a></li>
       </ul>

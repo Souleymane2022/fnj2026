@@ -30,9 +30,10 @@ $donnees = [
     'code'         => $insc['code'],
     'qr'           => verification_url($insc),
     'photo'        => photo_url($insc),
-    'logo'         => config('ministere.logo'),
+    'logo'         => config('event.logo'),
     'evenement'    => config('event.nom'),
     'annee'        => config('event.annee'),
+    'edition'      => config('event.edition') . ' · ' . mb_strtoupper(config('event.ville')) . ' ' . config('event.annee'),
     'dates'        => config('event.dates'),
     'lieu'         => config('event.lieu'),
     'pays'         => config('ministere.pays'),
@@ -47,7 +48,7 @@ require __DIR__ . '/inc/header.php';
 
 <section class="page-titre" style="background: <?= e($cat['couleur']) ?>">
   <div class="container">
-    <div class="ariane"><a href="index.php">Forum 2026</a> › Badge électronique</div>
+    <div class="ariane"><a href="index.php">FNJ 2026</a> › Badge électronique</div>
     <h1>Badge électronique d'entrée</h1>
     <p><?= e($insc['prenom'] . ' ' . $insc['nom']) ?> – <?= e($cat['label']) ?></p>
   </div>
@@ -56,14 +57,14 @@ require __DIR__ . '/inc/header.php';
 <section class="section section--gris" style="padding-top:36px">
   <div class="container">
     <?php if ($nouveau && $insc['statut'] === 'valide'): ?>
-      <div class="alerte alerte-succes"><strong>Félicitations, votre inscription est enregistrée !</strong> Votre badge est prêt : téléchargez-le ou imprimez-le et présentez-le à l'entrée du Forum.</div>
+      <div class="alerte alerte-succes"><strong>Félicitations, votre inscription est enregistrée !</strong> Votre badge est prêt : téléchargez-le ou imprimez-le et présentez-le à l'entrée de la FNJ.</div>
     <?php elseif ($nouveau): ?>
       <div class="alerte alerte-info"><strong>Votre inscription est enregistrée.</strong> Votre badge sera activé après vérification par le comité d'organisation. Conservez ce lien pour le consulter.</div>
     <?php endif; ?>
     <?php if ($insc['statut'] === 'en_attente' && !$nouveau): ?>
       <div class="alerte alerte-attention">Ce badge est en attente de validation par le comité d'organisation.</div>
     <?php elseif ($insc['statut'] === 'revoque'): ?>
-      <div class="alerte alerte-erreur">Ce badge a été annulé et ne permet plus l'accès au Forum.</div>
+      <div class="alerte alerte-erreur">Ce badge a été annulé et ne permet plus l'accès à la FNJ.</div>
     <?php endif; ?>
 
     <div class="badge-page">
@@ -100,7 +101,7 @@ require __DIR__ . '/inc/header.php';
 </section>
 
 <script src="assets/js/vendor/qrcode.js"></script>
-<script src="assets/js/badge.js?v=3"></script>
+<script src="assets/js/badge.js?v=4"></script>
 <script>
 (function () {
   var donnees = <?= json_encode($donnees, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;

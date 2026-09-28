@@ -40,7 +40,7 @@ require __DIR__ . '/inc/header.php';
 
 <section class="page-titre">
   <div class="container">
-    <div class="ariane"><a href="index.php">Forum 2026</a> › Retrouver mon badge</div>
+    <div class="ariane"><a href="index.php">FNJ 2026</a> › Retrouver mon badge</div>
     <h1>Retrouver mon badge</h1>
     <p>Saisissez l'adresse e-mail et le téléphone utilisés lors de votre inscription.</p>
   </div>

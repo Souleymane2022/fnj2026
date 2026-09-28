@@ -12,12 +12,12 @@ $r = root();
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($titre) ?> – <?= e($m['nom']) ?></title>
-<meta name="description" content="Inscriptions et badges officiels du <?= e($ev['nom'] . ' ' . $ev['annee']) ?> – <?= e($m['nom']) ?>, <?= e($m['pays']) ?>.">
-<link rel="icon" href="<?= e($r . $m['logo']) ?>">
+<meta name="description" content="Inscriptions et badges officiels de la <?= e($ev['nom'] . ' ' . $ev['annee']) ?> – <?= e($m['nom']) ?>, <?= e($m['pays']) ?>.">
+<link rel="icon" href="<?= e($r . $ev['logo']) ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<?= e($r) ?>assets/css/style.css?v=3">
+<link rel="stylesheet" href="<?= e($r) ?>assets/css/style.css?v=4">
 </head>
 <body>
 
@@ -41,7 +41,7 @@ $r = root();
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="<?= e($r) ?>index.php">
-      <img class="brand__logo" src="<?= e($r . $m['logo']) ?>" alt="Logo <?= e($m['nom']) ?>">
+      <img class="brand__logo" src="<?= e($r . $ev['logo']) ?>" alt="Logo de la <?= e($ev['edition'] . ' ' . $ev['nom']) ?>">
       <span class="brand__text">
         <span class="brand__pays"><?= e($m['pays']) ?></span>
         <span class="brand__devise"><?= e($m['devise']) ?></span>
@@ -49,7 +49,7 @@ $r = root();
       </span>
     </a>
     <div class="site-header__event">
-      <span class="site-header__sigle"><?= e($ev['sigle']) ?></span>
+      <span class="site-header__sigle"><?= e($ev['sigle']) ?> · <?= e($ev['ville']) ?></span>
       <span><?= e($ev['dates']) ?></span>
     </div>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="menu" onclick="var n=document.getElementById('menu');var o=n.classList.toggle('open');this.setAttribute('aria-expanded',o)">
@@ -60,7 +60,7 @@ $r = root();
     <div class="container">
       <ul>
         <li><a href="<?= e($m['site']) ?>">Accueil Ministère</a></li>
-        <li class="<?= $page === 'forum' ? 'active' : '' ?>"><a href="<?= e($r) ?>index.php">Le Forum 2026</a></li>
+        <li class="<?= $page === 'forum' ? 'active' : '' ?>"><a href="<?= e($r) ?>index.php">La FNJ 2026</a></li>
         <li class="<?= $page === 'inscription' ? 'active' : '' ?>"><a href="<?= e($r) ?>index.php#inscriptions">S'inscrire</a></li>
         <li class="<?= $page === 'retrouver' ? 'active' : '' ?>"><a href="<?= e($r) ?>retrouver.php">Retrouver mon badge</a></li>
         <li class="<?= $page === 'verifier' ? 'active' : '' ?>"><a href="<?= e($r) ?>verifier.php">Vérifier un badge</a></li>

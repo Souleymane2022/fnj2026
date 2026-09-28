@@ -253,7 +253,7 @@ function categories(): array
             'lettre'  => 'S',
             'couleur' => '#B8860B',
             'icone'   => '⭐',
-            'resume'  => 'Entreprises et opérateurs économiques qui soutiennent financièrement ou matériellement le Forum.',
+            'resume'  => 'Entreprises et opérateurs économiques qui soutiennent financièrement ou matériellement la FNJ.',
         ],
         'exposant' => [
             'label'   => 'Exposant',
@@ -261,7 +261,7 @@ function categories(): array
             'lettre'  => 'E',
             'couleur' => '#D35400',
             'icone'   => '🏪',
-            'resume'  => 'Startups, coopératives, associations et entreprises souhaitant tenir un stand au village du Forum.',
+            'resume'  => 'Startups, coopératives, associations et entreprises souhaitant tenir un stand au village de la FNJ.',
         ],
         'presse' => [
             'label'   => 'Presse / Média',
@@ -308,14 +308,14 @@ function provinces(): array
 function thematiques(): array
 {
     return [
-        'Emploi et entrepreneuriat des jeunes',
-        'Numérique et innovation',
-        'Paix, cohésion sociale et citoyenneté',
-        'Éducation et formation professionnelle',
-        'Santé et bien-être des jeunes',
-        'Environnement et changement climatique',
-        'Sport, culture et loisirs',
-        'Participation des jeunes à la gouvernance',
+        'Talents, arts et culture',
+        'Entrepreneuriat, emploi et autonomisation',
+        'Agriculture, élevage et environnement',
+        'Paix, cohésion sociale et vivre-ensemble',
+        'Participation citoyenne : faire entendre la voix des jeunes',
+        'Innovation, numérique et technologies',
+        'Sport et loisirs',
+        'Éducation, formation et santé des jeunes',
     ];
 }
 

@@ -17,7 +17,7 @@ function champs_identite(string $cat): array
         'prenom'         => ['label' => 'Prénom(s)', 'type' => 'text', 'requis' => true, 'max' => 80],
         'sexe'           => ['label' => 'Sexe', 'type' => 'select', 'requis' => true, 'options' => ['Masculin', 'Féminin']],
         'date_naissance' => ['label' => 'Date de naissance', 'type' => 'date', 'requis' => $ageRequis,
-                             'aide' => $cat === 'jeune' ? 'Le Forum est ouvert aux jeunes de 15 à 35 ans.' : null],
+                             'aide' => $cat === 'jeune' ? 'La FNJ est ouverte aux jeunes de 15 à 35 ans.' : null],
         'nationalite'    => ['label' => 'Nationalité', 'type' => 'text', 'requis' => true, 'max' => 60, 'defaut' => 'Tchadienne'],
         'province'       => ['label' => 'Province de résidence', 'type' => 'select', 'requis' => $cat !== 'officiel' && $cat !== 'partenaire',
                              'options' => array_merge(provinces(), ['Hors du Tchad'])],
@@ -40,13 +40,17 @@ function champs_profil(string $cat): array
         case 'jeune':
             return [
                 'statut'        => ['label' => 'Situation actuelle', 'type' => 'select', 'requis' => true,
-                                    'options' => ['Élève', 'Étudiant(e)', 'Jeune diplômé(e)', 'Salarié(e)', 'Entrepreneur(e)', 'Artisan / Agriculteur(trice)', 'Sans emploi', 'Autre']],
+                                    'options' => ['Élève', 'Étudiant(e)', 'Jeune diplômé(e)', 'Salarié(e)', 'Entrepreneur(e)', 'Agriculteur(trice) / Éleveur(se)', 'Artisan(e)', 'Artiste', 'Sportif(ve)', 'Innovateur(trice)', 'Acteur(trice) associatif(ve)', 'Sans emploi', 'Autre']],
                 'niveau_etude'  => ['label' => 'Niveau d\'études', 'type' => 'select', 'requis' => true,
                                     'options' => ['Aucun', 'Primaire', 'Secondaire', 'Baccalauréat', 'Licence', 'Master', 'Doctorat', 'Formation professionnelle', 'École coranique / franco-arabe']],
                 'organisation'  => ['label' => 'Association / mouvement de jeunesse', 'type' => 'text', 'requis' => false, 'colonne' => true, 'aide' => 'Facultatif'],
                 'fonction'      => ['label' => 'Rôle dans l\'organisation', 'type' => 'text', 'requis' => false, 'colonne' => true],
                 'thematiques'   => ['label' => 'Thématiques qui vous intéressent', 'type' => 'checkbox', 'requis' => true, 'options' => thematiques(), 'plein' => true],
-                'attentes'      => ['label' => 'Vos attentes vis-à-vis du Forum', 'type' => 'textarea', 'requis' => false, 'plein' => true, 'max' => 1000],
+                'talent'        => ['label' => 'Souhaitez-vous présenter un talent ?', 'type' => 'select', 'requis' => false,
+                                    'options' => ['Musique / chant', 'Danse', 'Slam / poésie / théâtre', 'Arts plastiques / artisanat', 'Sport', 'Innovation / projet entrepreneurial', 'Produits agricoles / transformation', 'Autre']],
+                'talent_detail' => ['label' => 'Décrivez votre talent ou votre projet', 'type' => 'text', 'requis' => false, 'max' => 200],
+                'hebergement'   => ['label' => 'Besoin d\'hébergement à Pala ?', 'type' => 'radio', 'requis' => true, 'options' => ['Oui', 'Non']],
+                'attentes'      => ['label' => 'Vos attentes vis-à-vis de la FNJ', 'type' => 'textarea', 'requis' => false, 'plein' => true, 'max' => 1000],
                 'besoins'       => ['label' => 'Besoins spécifiques (handicap, accessibilité…)', 'type' => 'text', 'requis' => false, 'plein' => true],
             ];
         case 'partenaire':
@@ -110,7 +114,7 @@ function champs_profil(string $cat): array
                                     'options' => ['Accueil & orientation', 'Protocole', 'Logistique', 'Communication & médias', 'Sécurité & contrôle d\'accès', 'Santé / secourisme', 'Commission technique', 'Comité d\'organisation']],
                 'organisation'  => ['label' => 'Structure d\'origine', 'type' => 'text', 'requis' => false, 'colonne' => true],
                 'fonction'      => ['label' => 'Profession / filière', 'type' => 'text', 'requis' => false, 'colonne' => true],
-                'disponibilite' => ['label' => 'Disponibilités', 'type' => 'checkbox', 'requis' => true, 'options' => ['Préparation (avant le Forum)', 'Jour 1', 'Jour 2', 'Jour 3']],
+                'disponibilite' => ['label' => 'Disponibilités', 'type' => 'checkbox', 'requis' => true, 'options' => ['Préparation (avant la FNJ)', 'Jour 1', 'Jour 2', 'Jour 3']],
                 'taille_tshirt' => ['label' => 'Taille de t-shirt', 'type' => 'select', 'requis' => true, 'options' => ['S', 'M', 'L', 'XL', 'XXL']],
                 'competences'   => ['label' => 'Compétences / expériences', 'type' => 'textarea', 'requis' => false, 'plein' => true, 'max' => 1000],
             ];

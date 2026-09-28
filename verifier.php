@@ -26,9 +26,9 @@ $titres = ['ok' => '✔ BADGE VALIDE', 'deja' => '✔ BADGE VALIDE', 'attente' =
 
 <section class="page-titre">
   <div class="container">
-    <div class="ariane"><a href="index.php">Forum 2026</a> › Vérification</div>
+    <div class="ariane"><a href="index.php">FNJ 2026</a> › Vérification</div>
     <h1>Vérification d'un badge</h1>
-    <p>Contrôle d'authenticité des badges du <?= e(config('event.nom') . ' ' . config('event.annee')) ?>.</p>
+    <p>Contrôle d'authenticité des badges de la <?= e(config('event.nom') . ' ' . config('event.annee')) ?>.</p>
   </div>
 </section>
 
