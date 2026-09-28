@@ -58,17 +58,18 @@ return [
     'validation_requise' => [],
 
     // --- Stockage -----------------------------------------------------------
+    // En ligne (Vercel) : définir la variable DATABASE_URL (PostgreSQL, ex. Neon).
+    // Sans DATABASE_URL, une base SQLite locale est utilisée (développement).
     'db_path'     => __DIR__ . '/data/fnj2026.sqlite',
-    'photos_dir'  => __DIR__ . '/data/photos',
-    'photo_max_mo' => 5,
+    'photo_max_mo' => 4, // les fonctions Vercel acceptent 4,5 Mo par requête au maximum
 
-    // --- E-mail de confirmation (fonction mail() de PHP) ----------------------
+    // --- E-mail de confirmation (fonction mail() de PHP, indisponible sur Vercel)
     'email' => [
         'actif'      => false,
         'expediteur' => 'no-reply@jeunesse.gouv.td',
     ],
 
-    // URL publique de l'application (sans / final). Laisser vide pour la
-    // détecter automatiquement.
+    // URL publique de l'application (sans / final), utilisée dans les QR codes.
+    // Sur Vercel : variable FNJ_BASE_URL = https://fnj2026.vercel.app
     'base_url' => getenv('FNJ_BASE_URL') ?: '',
 ];

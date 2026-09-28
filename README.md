@@ -18,29 +18,45 @@ Plateforme d'inscription du **Forum National de la Jeunesse 2026** du Ministère
   - **scanner d'entrée** (caméra du téléphone ou douchette USB) : accès autorisé / déjà entré / refusé, signal sonore, historique, décompte des présents du jour
 - Anti-doublon (e-mail + catégorie), protection CSRF, champ anti-robot, photos stockées hors accès direct.
 
-## Installation
+## Déploiement sur Vercel (https://fnj2026.vercel.app)
 
-Prérequis : PHP 8.0+ avec les extensions `pdo_sqlite` et `gd` (disponibles chez la plupart des hébergeurs, y compris ceux qui font tourner WordPress). Aucune base MySQL ni dépendance à installer.
+Vercel ne conserve aucun fichier entre deux requêtes : l'application y stocke donc **tout dans PostgreSQL** (inscriptions, photos, sessions, entrées). Le PHP tourne avec le runtime communautaire [`vercel-php`](https://github.com/vercel-community/php) déclaré dans `vercel.json`, et toutes les pages passent par `api/index.php`.
 
-1. Copier le dossier sur le serveur (ex. `https://jeunesse.gouv.td/fnj2026/`).
-2. Donner les droits d'écriture au serveur web sur `data/`.
-3. Modifier **`config.php`** :
-   - `event` : dates, lieu, thème, date limite d'inscription ;
-   - `secret` : une clé aléatoire (`php -r "echo bin2hex(random_bytes(32));"`) — ne plus la changer ensuite, sinon les QR codes déjà émis deviennent invalides ;
-   - `utilisateurs` : remplacer les mots de passe par défaut (`admin` / `fnj2026admin`, `controle` / `fnj2026controle`) par des hash ;
-   - `validation_requise` : catégories dont le badge doit être approuvé avant d'être actif (ex. `['presse']`).
-4. Remplacer `assets/img/logo.svg` par le **logo officiel** du Ministère (ou modifier `ministere.logo`).
-5. Servir le site en **HTTPS** : c'est obligatoire pour que la caméra du scanner fonctionne.
+1. **Base de données** : dans le projet Vercel → *Storage* → *Create Database* → **Neon (Postgres)**, puis connectez-la au projet. Vercel crée alors automatiquement la variable `DATABASE_URL` (ou `POSTGRES_URL`). Les tables sont créées au premier chargement de page.
+2. **Variables d'environnement** (*Settings → Environment Variables*) :
 
-Test en local :
+   | Variable | Valeur |
+   |---|---|
+   | `FNJ_BASE_URL` | `https://fnj2026.vercel.app` (adresse encodée dans les QR codes) |
+   | `FNJ_SECRET` | une clé aléatoire de 64 caractères, à ne plus changer ensuite (`openssl rand -hex 32`) |
+   | `FNJ_ADMIN_HASH` | hash du mot de passe admin (`php -r "echo password_hash('MotDePasse', PASSWORD_DEFAULT);"`) |
+   | `FNJ_AGENT_HASH` | hash du mot de passe des agents de contrôle |
+
+   Sans `FNJ_ADMIN_HASH` / `FNJ_AGENT_HASH`, les mots de passe par défaut `fnj2026admin` et `fnj2026controle` restent actifs.
+3. **Déployer** : le dépôt GitHub est relié au projet Vercel ; chaque `git push` sur la branche de production déclenche un déploiement (*Settings → Git → Production Branch*). Après avoir ajouté des variables, relancez un déploiement (*Deployments → Redeploy*).
+4. Remplacer `assets/img/logo.svg` par le logo officiel.
+
+Particularités de Vercel :
+- les photos sont recadrées et compressées **dans le navigateur** (480 × 600 JPEG, ~40 Ko) avant l'envoi, ce qui respecte la limite de 4,5 Mo par requête et économise les données mobiles ;
+- l'envoi d'e-mails (`mail()`) n'est pas disponible ;
+- le HTTPS est fourni automatiquement, ce qui permet la caméra du scanner.
+
+## Installation sur un hébergement PHP classique (Apache)
+
+Prérequis : PHP 8.0+ avec `pdo_sqlite` (ou `pdo_pgsql`) et idéalement `gd`.
+
+1. Copier le dossier sur le serveur, donner les droits d'écriture sur `data/`.
+2. Modifier **`config.php`** (événement, clé secrète, mots de passe, `validation_requise`).
+3. Sans `DATABASE_URL`, une base SQLite est créée dans `data/`.
+
+## Test en local
 
 ```bash
-php -S 127.0.0.1:8080
+php -S 127.0.0.1:8080 api/index.php          # mode Vercel (routeur), base SQLite
+DATABASE_URL=postgres://user:mdp@localhost:5432/fnj php -S 127.0.0.1:8080 api/index.php
 # http://127.0.0.1:8080          -> site public
 # http://127.0.0.1:8080/admin/   -> espace organisateurs
 ```
-
-Avec Nginx, interdire l'accès aux dossiers `data/` et `inc/` et au fichier `config.php` (les fichiers `.htaccess` fournis s'en chargent sous Apache).
 
 ## Structure
 
@@ -52,10 +68,12 @@ retrouver.php      Retrouver son badge
 verifier.php       Page ouverte par le QR code
 photo.php          Sert les photos (lien signé)
 admin/             Tableau de bord, fiche, export CSV, scanner d'entrée
-api/checkin.php    API JSON du scanner
+admin/checkin.php  API JSON du scanner
+api/index.php      Point d'entrée Vercel (routeur vers les pages)
+vercel.json        Configuration Vercel (runtime vercel-php)
 inc/               Noyau, champs des formulaires, contrôle d'accès, gabarits
 assets/            CSS, génération du badge (canvas), librairies QR
-data/              Base SQLite et photos (non versionnées)
+data/              Base SQLite locale (non versionnée)
 ```
 
 Librairies incluses : [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) et [html5-qrcode](https://github.com/mebjas/html5-qrcode) (licences MIT / Apache 2.0).

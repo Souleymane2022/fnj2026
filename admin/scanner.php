@@ -125,7 +125,7 @@ require __DIR__ . '/../inc/header.php';
     if (contenu === dernier.contenu && now - dernier.t < 5000) return; // évite les doubles lectures
     dernier = { contenu: contenu, t: now };
     enCours = true;
-    fetch('../api/checkin.php', {
+    fetch('checkin.php', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ csrf: CSRF, contenu: contenu, point: point.value, enregistrer: enregistrer.checked })

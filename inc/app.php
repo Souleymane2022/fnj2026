@@ -6,15 +6,6 @@
 
 declare(strict_types=1);
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_set_cookie_params([
-        'httponly' => true,
-        'samesite' => 'Lax',
-        'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
-    ]);
-    session_start();
-}
-
 date_default_timezone_set('Africa/Ndjamena');
 
 function config(?string $key = null)
@@ -47,14 +38,20 @@ function root(): string
     return defined('FNJ_ROOT') ? FNJ_ROOT : '';
 }
 
+function est_https(): bool
+{
+    return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
+}
+
 function base_url(): string
 {
     $cfg = config('base_url');
     if ($cfg) {
         return rtrim($cfg, '/');
     }
-    $https  = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-    $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $https  = est_https();
+    $host   = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'] ?? 'localhost';
     $appDir = realpath(__DIR__ . '/..');
     $docRoot = realpath($_SERVER['DOCUMENT_ROOT'] ?? '') ?: '';
     $path = '';
@@ -68,23 +65,56 @@ function base_url(): string
 // Base de données
 // ---------------------------------------------------------------------------
 
+/** URL PostgreSQL (Vercel Postgres / Neon / Supabase…) ; vide = SQLite local. */
+function db_url(): string
+{
+    foreach (['DATABASE_URL', 'POSTGRES_URL', 'POSTGRES_PRISMA_URL'] as $k) {
+        if ($v = getenv($k)) {
+            return $v;
+        }
+    }
+    return '';
+}
+
+function db_pgsql(): bool
+{
+    return db_url() !== '';
+}
+
 function db(): PDO
 {
     static $pdo = null;
     if ($pdo) {
         return $pdo;
     }
-    $path = config('db_path');
-    if (!is_dir(dirname($path))) {
-        mkdir(dirname($path), 0775, true);
+    $opts = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ];
+    if (db_pgsql()) {
+        $u = parse_url(db_url());
+        parse_str($u['query'] ?? '', $q);
+        $host = $u['host'] ?? 'localhost';
+        $dsn = 'pgsql:host=' . $host . ';port=' . ($u['port'] ?? 5432) . ';dbname=' . ltrim($u['path'] ?? '/postgres', '/')
+            . ';sslmode=' . ($q['sslmode'] ?? ($host === 'localhost' || $host === '127.0.0.1' ? 'prefer' : 'require'));
+        // Neon : identifiant de l'endpoint pour les clients sans SNI
+        if (preg_match('/^(ep-[a-z0-9-]+?)(-pooler)?\.[^.]+.*neon\.tech$/', $host, $m)) {
+            $dsn .= ";options='endpoint=" . $m[1] . "'";
+        }
+        $pdo = new PDO($dsn, rawurldecode($u['user'] ?? ''), rawurldecode($u['pass'] ?? ''), $opts);
+        $id = 'SERIAL PRIMARY KEY';
+    } else {
+        $path = config('db_path');
+        if (!is_dir(dirname($path))) {
+            mkdir(dirname($path), 0775, true);
+        }
+        $pdo = new PDO('sqlite:' . $path, null, null, $opts);
+        $pdo->exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
+        $id = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     }
-    $pdo = new PDO('sqlite:' . $path);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-    $pdo->exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
     $pdo->exec(<<<SQL
         CREATE TABLE IF NOT EXISTS inscriptions (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            id            $id,
             code          TEXT NOT NULL UNIQUE,
             categorie     TEXT NOT NULL,
             civilite      TEXT,
@@ -100,7 +130,7 @@ function db(): PDO
             organisation  TEXT,
             fonction      TEXT,
             details       TEXT,          -- JSON des champs propres à la catégorie
-            photo         TEXT,
+            photo         TEXT,          -- non vide si une photo existe (table photos)
             statut        TEXT NOT NULL DEFAULT 'valide', -- valide | en_attente | revoque
             cree_le       TEXT NOT NULL,
             ip            TEXT
@@ -108,7 +138,7 @@ function db(): PDO
         CREATE INDEX IF NOT EXISTS idx_insc_email ON inscriptions(email);
         CREATE INDEX IF NOT EXISTS idx_insc_cat ON inscriptions(categorie);
         CREATE TABLE IF NOT EXISTS entrees (
-            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            id             $id,
             inscription_id INTEGER NOT NULL REFERENCES inscriptions(id) ON DELETE CASCADE,
             jour           TEXT NOT NULL,
             heure          TEXT NOT NULL,
@@ -116,8 +146,82 @@ function db(): PDO
             point_acces    TEXT
         );
         CREATE INDEX IF NOT EXISTS idx_entrees_insc ON entrees(inscription_id, jour);
+        CREATE TABLE IF NOT EXISTS photos (
+            code  TEXT PRIMARY KEY,
+            data  TEXT NOT NULL      -- JPEG encodé en base64
+        );
+        CREATE TABLE IF NOT EXISTS sessions (
+            id       TEXT PRIMARY KEY,
+            data     TEXT NOT NULL,
+            modifie  INTEGER NOT NULL
+        );
     SQL);
     return $pdo;
+}
+
+/**
+ * Sessions stockées en base : indispensable sur Vercel, où chaque requête
+ * peut être servie par une instance différente sans disque partagé.
+ */
+class SessionBdd implements SessionHandlerInterface
+{
+    public function open($path, $name): bool { return true; }
+    public function close(): bool { return true; }
+
+    public function read($id): string
+    {
+        $st = db()->prepare('SELECT data FROM sessions WHERE id = ? AND modifie > ?');
+        $st->execute([$id, time() - 43200]);
+        return (string) ($st->fetchColumn() ?: '');
+    }
+
+    public function write($id, $data): bool
+    {
+        if ($data === '') {
+            // Pas de session vide en base (visiteurs, robots)
+            return $this->destroy($id);
+        }
+        db()->prepare('INSERT INTO sessions (id, data, modifie) VALUES (?, ?, ?)
+                       ON CONFLICT (id) DO UPDATE SET data = excluded.data, modifie = excluded.modifie')
+            ->execute([$id, $data, time()]);
+        return true;
+    }
+
+    public function destroy($id): bool
+    {
+        db()->prepare('DELETE FROM sessions WHERE id = ?')->execute([$id]);
+        return true;
+    }
+
+    #[\ReturnTypeWillChange]
+    public function gc($max)
+    {
+        return db()->prepare('DELETE FROM sessions WHERE modifie < ?')->execute([time() - 43200]) ? 1 : 0;
+    }
+}
+
+function demarrer_session(): void
+{
+    if (session_status() !== PHP_SESSION_NONE || PHP_SAPI === 'cli' && !isset($_SERVER['REQUEST_METHOD'])) {
+        return;
+    }
+    session_set_save_handler(new SessionBdd(), true);
+    session_name('fnj2026');
+    session_set_cookie_params([
+        'httponly' => true,
+        'samesite' => 'Lax',
+        'secure'   => est_https(),
+        'path'     => '/',
+    ]);
+    ini_set('session.gc_probability', '1');
+    ini_set('session.gc_divisor', '100');
+    session_start();
+}
+
+/** LIKE insensible à la casse sur SQLite comme sur PostgreSQL. */
+function sql_like(): string
+{
+    return db_pgsql() ? 'ILIKE' : 'LIKE';
 }
 
 // ---------------------------------------------------------------------------
@@ -358,3 +462,5 @@ function flash(?string $msg = null, string $type = 'succes'): ?array
     unset($_SESSION['flash']);
     return $f;
 }
+
+demarrer_session();

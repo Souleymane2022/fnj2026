@@ -8,8 +8,12 @@ exiger_connexion('admin');
 $where = [];
 $params = [];
 if (($q = trim((string) ($_GET['q'] ?? ''))) !== '') {
-    $where[] = '(nom LIKE :q OR prenom LIKE :q OR code LIKE :q OR email LIKE :q OR telephone LIKE :q OR organisation LIKE :q)';
-    $params[':q'] = "%$q%";
+    $conds = [];
+    foreach (['nom', 'prenom', 'code', 'email', 'telephone', 'organisation'] as $i => $col) {
+        $conds[] = "$col " . sql_like() . " :q$i";
+        $params[":q$i"] = "%$q%";
+    }
+    $where[] = '(' . implode(' OR ', $conds) . ')';
 }
 foreach (['categorie', 'statut', 'province'] as $k) {
     if (($v = (string) ($_GET[$k] ?? '')) !== '') {

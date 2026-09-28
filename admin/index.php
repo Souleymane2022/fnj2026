@@ -15,12 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->prepare('UPDATE inscriptions SET statut = ? WHERE id = ?')->execute([$statuts[$action], $id]);
             flash('Statut mis à jour.');
         } elseif ($action === 'supprimer') {
-            $st = db()->prepare('SELECT photo FROM inscriptions WHERE id = ?');
-            $st->execute([$id]);
-            $photo = $st->fetchColumn();
-            if ($photo) {
-                @unlink(config('photos_dir') . '/' . basename($photo));
-            }
+            db()->prepare('DELETE FROM photos WHERE code = (SELECT code FROM inscriptions WHERE id = ?)')->execute([$id]);
+            db()->prepare('DELETE FROM entrees WHERE inscription_id = ?')->execute([$id]);
             db()->prepare('DELETE FROM inscriptions WHERE id = ?')->execute([$id]);
             flash('Inscription supprimée.');
         }
@@ -43,8 +39,12 @@ function filtres_sql(array $f): array
     $where = [];
     $params = [];
     if ($f['q'] !== '') {
-        $where[] = "(nom LIKE :q OR prenom LIKE :q OR code LIKE :q OR email LIKE :q OR telephone LIKE :q OR organisation LIKE :q)";
-        $params[':q'] = '%' . $f['q'] . '%';
+        $conds = [];
+        foreach (['nom', 'prenom', 'code', 'email', 'telephone', 'organisation'] as $i => $col) {
+            $conds[] = "$col " . sql_like() . " :q$i";
+            $params[":q$i"] = '%' . $f['q'] . '%';
+        }
+        $where[] = '(' . implode(' OR ', $conds) . ')';
     }
     foreach (['categorie', 'statut', 'province'] as $k) {
         if ($f[$k] !== '') {

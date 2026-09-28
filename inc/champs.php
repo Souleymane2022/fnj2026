@@ -253,7 +253,7 @@ function valider_champs(array $champs, array $post, array &$erreurs): array
     return $out;
 }
 
-/** Enregistre la photo recadrée (4:5, 480×600, JPEG). Retourne le nom du fichier ou une erreur. */
+/** Enregistre la photo recadrée (4:5, 480×600, JPEG) en base. Retourne un nom ou null + erreur. */
 function enregistrer_photo(array $fichier, string $code, ?string &$erreur): ?string
 {
     if (($fichier['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
@@ -266,18 +266,41 @@ function enregistrer_photo(array $fichier, string $code, ?string &$erreur): ?str
     }
     $info = @getimagesize($fichier['tmp_name']);
     $types = [IMAGETYPE_JPEG => 'imagecreatefromjpeg', IMAGETYPE_PNG => 'imagecreatefrompng', IMAGETYPE_WEBP => 'imagecreatefromwebp'];
-    if (!$info || !isset($types[$info[2]]) || !function_exists($types[$info[2]])) {
+    if (!$info || !isset($types[$info[2]])) {
         $erreur = 'Format de photo non accepté (JPEG, PNG ou WEBP).';
         return null;
     }
-    $src = @$types[$info[2]]($fichier['tmp_name']);
+    if (function_exists($types[$info[2]]) && function_exists('imagecreatetruecolor')) {
+        $jpeg = recadrer_photo_gd($fichier['tmp_name'], $info, $types[$info[2]]);
+        if ($jpeg === null) {
+            $erreur = 'La photo est illisible.';
+            return null;
+        }
+    } else {
+        // Sans GD (ex. Vercel) : la photo a déjà été recadrée et compressée
+        // par le navigateur (voir inscription.php) ; on la stocke telle quelle.
+        if ($fichier['size'] > 1.5 * 1024 * 1024) {
+            $erreur = 'La photo est trop lourde (1,5 Mo maximum).';
+            return null;
+        }
+        $jpeg = (string) file_get_contents($fichier['tmp_name']);
+    }
+    // Stockée en base : le disque des fonctions Vercel n'est pas persistant.
+    db()->prepare('INSERT INTO photos (code, data) VALUES (?, ?) ON CONFLICT (code) DO UPDATE SET data = excluded.data')
+        ->execute([$code, base64_encode($jpeg)]);
+    return $code . '.jpg';
+}
+
+/** Recadrage 4:5 et redimensionnement 480×600 avec GD. */
+function recadrer_photo_gd(string $chemin, array $info, string $fonction): ?string
+{
+    $src = @$fonction($chemin);
     if (!$src) {
-        $erreur = 'La photo est illisible.';
         return null;
     }
     // Orientation EXIF des photos prises au téléphone
     if ($info[2] === IMAGETYPE_JPEG && function_exists('exif_read_data')) {
-        $exif = @exif_read_data($fichier['tmp_name']);
+        $exif = @exif_read_data($chemin);
         $rot = [3 => 180, 6 => -90, 8 => 90][$exif['Orientation'] ?? 0] ?? 0;
         if ($rot) {
             $src = imagerotate($src, $rot, 0);
@@ -294,13 +317,10 @@ function enregistrer_photo(array $fichier, string $code, ?string &$erreur): ?str
     $dst = imagecreatetruecolor(480, 600);
     imagefill($dst, 0, 0, imagecolorallocate($dst, 255, 255, 255));
     imagecopyresampled($dst, $src, 0, 0, $cx, $cy, 480, 600, $cw, $ch);
-    $dir = config('photos_dir');
-    if (!is_dir($dir)) {
-        mkdir($dir, 0775, true);
-    }
-    $nomFichier = $code . '.jpg';
-    imagejpeg($dst, $dir . '/' . $nomFichier, 86);
+    ob_start();
+    imagejpeg($dst, null, 85);
+    $jpeg = (string) ob_get_clean();
     imagedestroy($src);
     imagedestroy($dst);
-    return $nomFichier;
+    return $jpeg;
 }

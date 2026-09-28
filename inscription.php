@@ -213,12 +213,38 @@ require __DIR__ . '/inc/header.php';
 (function () {
   var input = document.getElementById('f_photo');
   var apercu = document.getElementById('photo-apercu');
+  var traitement = null;
+  function afficher(blob) {
+    apercu.style.backgroundImage = 'url(' + URL.createObjectURL(blob) + ')';
+    apercu.textContent = '';
+  }
+  // Recadrage 4:5 et compression dans le navigateur (480 × 600 JPEG) :
+  // envoi léger, même depuis un téléphone, et aucune dépendance serveur.
   input.addEventListener('change', function () {
     var f = input.files && input.files[0];
-    if (!f) return;
-    var url = URL.createObjectURL(f);
-    apercu.style.backgroundImage = 'url(' + url + ')';
-    apercu.textContent = '';
+    if (!f || f.__fnj) return;
+    traitement = new Promise(function (resolve) {
+      var img = new Image();
+      img.onload = function () {
+        var W = 480, H = 600, r = W / H, w = img.naturalWidth, h = img.naturalHeight, cw, ch, cx, cy;
+        if (w / h > r) { ch = h; cw = h * r; cx = (w - cw) / 2; cy = 0; }
+        else { cw = w; ch = w / r; cx = 0; cy = Math.max(0, (h - ch) / 3); }
+        var c = document.createElement('canvas'); c.width = W; c.height = H;
+        var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+        ctx.drawImage(img, cx, cy, cw, ch, 0, 0, W, H);
+        c.toBlob(function (blob) {
+          try {
+            var nf = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
+            nf.__fnj = true;
+            var dt = new DataTransfer(); dt.items.add(nf); input.files = dt.files;
+            afficher(blob);
+          } catch (e) { afficher(f); }
+          resolve();
+        }, 'image/jpeg', 0.85);
+      };
+      img.onerror = function () { afficher(f); resolve(); };
+      img.src = URL.createObjectURL(f);
+    });
   });
   document.getElementById('form-inscription').addEventListener('submit', function (ev) {
     var form = ev.target;
@@ -237,6 +263,11 @@ require __DIR__ . '/inc/header.php';
     }
     var b = document.getElementById('btn-envoyer');
     b.disabled = true; b.textContent = 'Génération du badge…';
+    if (traitement) {
+      // Attendre la fin du recadrage de la photo avant l'envoi
+      ev.preventDefault();
+      traitement.then(function () { traitement = null; form.submit(); });
+    }
   });
 })();
 </script>
