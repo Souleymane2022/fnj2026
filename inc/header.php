@@ -21,6 +21,11 @@ $r = root();
 </head>
 <body>
 
+<?php if (db_temporaire()): ?>
+<div style="background:#C60C30;color:#fff;text-align:center;padding:10px 16px;font-size:14px;font-weight:600">
+  ⚠ Mode test : aucune base de données n'est configurée (variable DATABASE_URL). Les inscriptions seront perdues au prochain redémarrage du serveur.
+</div>
+<?php endif; ?>
 <div class="topbar">
   <div class="container topbar__inner">
     <div class="topbar__contact">

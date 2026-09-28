@@ -35,6 +35,8 @@ Vercel ne conserve aucun fichier entre deux requêtes : l'application y stocke d
    Sans `FNJ_ADMIN_HASH` / `FNJ_AGENT_HASH`, les mots de passe par défaut `fnj2026admin` et `fnj2026controle` restent actifs.
 3. **Déployer** : le dépôt GitHub est relié au projet Vercel ; chaque `git push` sur la branche de production déclenche un déploiement (*Settings → Git → Production Branch*). Après avoir ajouté des variables, relancez un déploiement (*Deployments → Redeploy*).
 
+En cas de problème, ouvrez **https://fnj2026.vercel.app/diagnostic.php** : cette page vérifie PHP, la variable `DATABASE_URL`, la connexion à la base et les réglages de sécurité (sans afficher de mot de passe). Les erreurs détaillées apparaissent dans Vercel → *Logs* (ou à l'écran avec la variable `FNJ_DEBUG=1`, à retirer ensuite).
+
 Particularités de Vercel :
 - les photos sont recadrées et compressées **dans le navigateur** (480 × 600 JPEG, ~40 Ko) avant l'envoi, ce qui respecte la limite de 4,5 Mo par requête et économise les données mobiles ;
 - l'envoi d'e-mails (`mail()`) n'est pas disponible ;

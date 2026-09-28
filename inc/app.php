@@ -8,6 +8,26 @@ declare(strict_types=1);
 
 date_default_timezone_set('Africa/Ndjamena');
 
+// Toute erreur non gérée : page explicite + trace dans les journaux (Vercel → Logs)
+set_exception_handler(function (Throwable $ex) {
+    error_log('[FNJ] ' . get_class($ex) . ': ' . $ex->getMessage() . ' @ ' . $ex->getFile() . ':' . $ex->getLine());
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: text/html; charset=utf-8');
+    }
+    $bdd = $ex instanceof PDOException;
+    $titre = $bdd ? 'Base de données inaccessible' : 'Erreur interne';
+    $aide = $bdd
+        ? 'La plateforme n\'arrive pas à se connecter à sa base de données. Vérifiez la variable DATABASE_URL du projet Vercel, puis ouvrez /diagnostic.php.'
+        : 'Une erreur inattendue est survenue. Réessayez dans quelques instants.';
+    echo '<!DOCTYPE html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+        . '<title>' . $titre . '</title><body style="font-family:Arial,sans-serif;background:#f4f6fa;margin:0;padding:40px 16px">'
+        . '<div style="max-width:620px;margin:auto;background:#fff;border-top:6px solid #C60C30;border-radius:8px;padding:28px;box-shadow:0 6px 24px rgba(0,38,100,.1)">'
+        . '<h1 style="color:#002664;margin-top:0">' . $titre . '</h1><p>' . htmlspecialchars($aide) . '</p>'
+        . (getenv('FNJ_DEBUG') ? '<pre style="white-space:pre-wrap;background:#fdecef;padding:12px;border-radius:6px">' . htmlspecialchars(get_class($ex) . ': ' . $ex->getMessage()) . '</pre>' : '')
+        . '<p><a href="/">Retour à l\'accueil</a></p></div></body></html>';
+});
+
 function config(?string $key = null)
 {
     static $cfg = null;
@@ -81,6 +101,12 @@ function db_pgsql(): bool
     return db_url() !== '';
 }
 
+/** Sur Vercel sans PostgreSQL : SQLite dans /tmp, effacé à chaque redémarrage. */
+function db_temporaire(): bool
+{
+    return !db_pgsql() && getenv('VERCEL');
+}
+
 function db(): PDO
 {
     static $pdo = null;
@@ -101,10 +127,15 @@ function db(): PDO
         if (preg_match('/^(ep-[a-z0-9-]+?)(-pooler)?\.[^.]+.*neon\.tech$/', $host, $m)) {
             $dsn .= ";options='endpoint=" . $m[1] . "'";
         }
+        // Requêtes préparées émulées : compatibles avec les pools de connexions
+        // (Neon « -pooler », PgBouncer, Supabase).
+        $opts[PDO::ATTR_EMULATE_PREPARES] = true;
+        $opts[PDO::ATTR_TIMEOUT] = 10;
         $pdo = new PDO($dsn, rawurldecode($u['user'] ?? ''), rawurldecode($u['pass'] ?? ''), $opts);
         $id = 'SERIAL PRIMARY KEY';
     } else {
-        $path = config('db_path');
+        // Le dossier du projet est en lecture seule sur Vercel
+        $path = db_temporaire() ? sys_get_temp_dir() . '/fnj2026.sqlite' : config('db_path');
         if (!is_dir(dirname($path))) {
             mkdir(dirname($path), 0775, true);
         }
@@ -205,7 +236,14 @@ function demarrer_session(): void
     if (session_status() !== PHP_SESSION_NONE || PHP_SAPI === 'cli' && !isset($_SERVER['REQUEST_METHOD'])) {
         return;
     }
-    session_set_save_handler(new SessionBdd(), true);
+    try {
+        db();
+        session_set_save_handler(new SessionBdd(), true);
+    } catch (Throwable $ex) {
+        // Base indisponible : sessions fichiers temporaires, la page affichera l'erreur
+        error_log('[FNJ] Session : ' . $ex->getMessage());
+        session_save_path(sys_get_temp_dir());
+    }
     session_name('fnj2026');
     session_set_cookie_params([
         'httponly' => true,

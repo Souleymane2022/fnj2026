@@ -16,6 +16,7 @@ $pages = [
     'retrouver.php' => 'retrouver.php',
     'verifier.php'  => 'verifier.php',
     'photo.php'     => 'photo.php',
+    'diagnostic.php' => 'diagnostic.php',
     'admin'         => 'admin/index.php',
     'admin/'        => 'admin/index.php',
     'admin/index.php'   => 'admin/index.php',
