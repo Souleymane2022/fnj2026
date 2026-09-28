@@ -77,4 +77,6 @@ assets/            CSS, génération du badge (canvas), librairies QR
 data/              Base SQLite locale (non versionnée)
 ```
 
+Plateforme conçue et développée par **M. Souleymane Mahamat Saleh**.
+
 Librairies incluses : [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) et [html5-qrcode](https://github.com/mebjas/html5-qrcode) (licences MIT / Apache 2.0).

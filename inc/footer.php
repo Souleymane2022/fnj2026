@@ -38,7 +38,7 @@ $r = root();
     </div>
   </div>
   <div class="site-footer__bottom">
-    <div class="container">© <?= date('Y') ?> <?= e($m['nom']) ?> – All rights reserved.</div>
+    <div class="container">© <?= date('Y') ?> <?= e($m['nom']) ?> – All rights reserved.<br><span style="opacity:.75">Plateforme conçue et développée par M. Souleymane Mahamat Saleh</span></div>
   </div>
 </footer>
 </body>
