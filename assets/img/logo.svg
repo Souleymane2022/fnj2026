@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Logo provisoire : remplacez ce fichier par le logo officiel du Ministère. -->
+  <defs>
+    <clipPath id="c"><circle cx="100" cy="100" r="78"/></clipPath>
+  </defs>
+  <circle cx="100" cy="100" r="96" fill="#fff" stroke="#002664" stroke-width="6"/>
+  <circle cx="100" cy="100" r="86" fill="none" stroke="#FECB00" stroke-width="4"/>
+  <g clip-path="url(#c)">
+    <rect x="22" y="22" width="52" height="156" fill="#002664"/>
+    <rect x="74" y="22" width="52" height="156" fill="#FECB00"/>
+    <rect x="126" y="22" width="52" height="156" fill="#C60C30"/>
+  </g>
+  <circle cx="100" cy="100" r="78" fill="none" stroke="#fff" stroke-width="3"/>
+  <polygon fill="#fff" stroke="#002664" stroke-width="2"
+    points="100,44 111,78 147,78 118,99 129,133 100,112 71,133 82,99 53,78 89,78"/>
+  <rect x="44" y="140" width="112" height="26" rx="6" fill="#002664"/>
+  <text x="100" y="159" text-anchor="middle" font-family="Montserrat,Arial,sans-serif" font-weight="800" font-size="18" fill="#fff" letter-spacing="2">MJS</text>
+</svg>
